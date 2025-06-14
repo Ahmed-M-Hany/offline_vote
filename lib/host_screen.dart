@@ -74,12 +74,16 @@ class _HostScreenState extends State<HostScreen> {
                       series: [
                         //for each vote, count how many times it appears in the recievedVotes list
                         PieSeries<String, String>(
-                          dataLabelMapper: (datum, index) => datum,
+                          dataLabelMapper: (datum, index) {
+                            var y =value.where((v) => v.vote == datum).length;
+                            return y!=0?datum:null;
+
+                          },
                           dataLabelSettings: const DataLabelSettings(isVisible: true, labelPosition: ChartDataLabelPosition.outside,color: Colors.white),
                           dataSource: constVotes,
                           xValueMapper: (String vote, _) {
-                            var y =value.where((v) => v.vote == vote).length;
-                            return y == 0 ? null : vote; // Show 'No Votes' if count is 0
+
+                            return vote;
                           },
                           yValueMapper: (String vote, _) => value.where((v) => v.vote == vote).length,
                           pointColorMapper: (String vote, _) {
@@ -179,12 +183,15 @@ class _RealTimeVotesListState extends State<RealTimeVotesList> {
           //check if the address is already in the list
           //if the address and username already exists, modify the existing vote
           final existingVoteIndex = -1;
-          if (existingVoteIndex != -1) {
-            recievedVotes.value[existingVoteIndex] = vote;
-          } else {
-            recievedVotes.value.add(vote);
-          }
-          setState(() {});
+
+          setState(() {
+            if (existingVoteIndex != -1) {
+              recievedVotes.value[existingVoteIndex] = vote;
+            } else {
+              recievedVotes.value.add(vote);
+            }
+            recievedVotes.notifyListeners();
+          });
           print('🔵 Received from ${datagram.address.address}: $message');
         }
       }
