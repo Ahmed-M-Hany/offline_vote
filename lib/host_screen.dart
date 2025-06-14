@@ -182,7 +182,7 @@ class _RealTimeVotesListState extends State<RealTimeVotesList> {
           VoteModel vote = VoteModel(vote: parts.first, username: parts.last,address: datagram.address.address);
           //check if the address is already in the list
           //if the address and username already exists, modify the existing vote
-          final existingVoteIndex = -1;
+          final existingVoteIndex = recievedVotes.value.indexWhere((v) => v.address == datagram.address.address && v.username == vote.username);
 
           setState(() {
             if (existingVoteIndex != -1) {
