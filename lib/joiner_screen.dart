@@ -3,11 +3,72 @@ import 'package:flutter/material.dart';
 import 'package:offline_voting/choosen_number_screen.dart';
 import 'package:offline_voting/local_network_service/local_network_service.dart';
 
-class JoinerScreen extends StatelessWidget {
+class JoinerScreen extends StatefulWidget {
   const JoinerScreen({super.key, required this.ipAndPort});
   final String ipAndPort;
-  final points = const [0, 1, 2, 3, 5, 8, 13, 21, 34, 55, 89, 144];
 
+  @override
+  State<JoinerScreen> createState() => _JoinerScreenState();
+}
+
+class _JoinerScreenState extends State<JoinerScreen> {
+  final points = const [0, 1, 2, 3, 5, 8, 13, 21, 34, 55, 89, 144];
+  //form key
+  final _formKey = GlobalKey<FormState>();
+  String _username="";
+  //open "please enter your username" dialog
+  initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _showUsernameDialog();
+    });
+  }
+  void _showUsernameDialog() {
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) {
+        return PopScope(
+          canPop: false,
+          child: AlertDialog(
+            content: Form(
+              key: _formKey,
+              child: TextFormField(
+                decoration:  InputDecoration(hintText: 'Username',hintStyle: TextStyle(color: Colors.grey)),
+                validator: (value) {
+                  _username = value ?? "";
+                  if(value == null || value.isEmpty) {
+                    return 'Please enter a username';
+                  }
+                  if (value.length < 3) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(content: Text('Username must be at least 4 characters ❌')),
+                    );
+                  }
+                  return null;
+                },
+              ),
+            ),
+            actions: [
+              TextButton(
+                onPressed: () {
+                  if (_formKey.currentState!.validate()) {
+                    Navigator.of(context).pop();
+                  } else {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(content: Text('Please enter a valid username ❌')),
+                    );
+                  }
+                },
+                child: const Text('OK'),
+              ),
+            ],
+
+          ),
+        );
+      },
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -38,7 +99,7 @@ class JoinerScreen extends StatelessWidget {
                     child: InkWell(
                       onTap: () {
                         Navigator.of(context).push(MaterialPageRoute(builder: (context) => ChoosenNumberScreen(points[index]),));
-                        sendMessageToHost(ipAndPort.split(" ").first,int.parse(ipAndPort.split(" ").last), points[index].toString());
+                        sendMessageToHost(widget.ipAndPort.split(" ").first,int.parse(widget.ipAndPort.split(" ").last), points[index].toString(),_username);
                       },
                       child: Center(
                         child: Text(

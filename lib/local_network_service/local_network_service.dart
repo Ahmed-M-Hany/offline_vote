@@ -38,10 +38,10 @@ Future<String> _getLocalIpAddress() async {
 
 
 
-Future<void> sendMessageToHost(String hostIp,int port, String message) async {
+Future<void> sendMessageToHost(String hostIp,int port, String message,String username) async {
   final sender = await RawDatagramSocket.bind(InternetAddress.anyIPv4, port);
 
-  final data = utf8.encode(message);
+  final data = utf8.encode("$message 9971 $username");
   sender.send(data, InternetAddress(hostIp), port);
 
   ScaffoldMessenger.of(navigatorKey.currentContext!).showSnackBar(

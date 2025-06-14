@@ -7,6 +7,9 @@ import 'package:flutter/material.dart';
 import 'package:barcode/barcode.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:network_info_plus/network_info_plus.dart';
+import 'package:offline_voting/Vote_model.dart';
+import 'package:offline_voting/votes_data.dart';
+import 'package:syncfusion_flutter_charts/charts.dart';
 import 'local_network_service/local_network_service.dart' as LocNetworkService;
 import 'main.dart';
 
@@ -19,6 +22,7 @@ class HostScreen extends StatefulWidget {
 
 class _HostScreenState extends State<HostScreen> {
   RawDatagramSocket? socket;
+  List<String> constVotes = ["0", "1", "2", "3", "5", "8", "13", "21", "34", "55", "89", "144"];
   @override
   void initState() {
     // TODO: implement initState
@@ -54,7 +58,66 @@ class _HostScreenState extends State<HostScreen> {
                     const Text('Add', style: TextStyle(color: Colors.white, fontSize: 18)),
                   ],
                 )),
-                Expanded(child: RealTimeVotesList(snapshot.data!)),
+                SizedBox(
+                  height: 82,
+                  child: Row(
+                    children: [
+                      Expanded(child: SizedBox(height: 80, child: RealTimeVotesList(snapshot.data!))),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: 8,),
+                ValueListenableBuilder<List<VoteModel>>(
+                  valueListenable: recievedVotes,
+                  builder: (BuildContext context, List<VoteModel> value, Widget? child) {
+                    return SfCircularChart(
+                      series: [
+                        //for each vote, count how many times it appears in the recievedVotes list
+                        PieSeries<String, String>(
+                          dataLabelMapper: (datum, index) => datum,
+                          dataLabelSettings: const DataLabelSettings(isVisible: true, labelPosition: ChartDataLabelPosition.outside,color: Colors.white),
+                          dataSource: constVotes,
+                          xValueMapper: (String vote, _) {
+                            var y =value.where((v) => v.vote == vote).length;
+                            return y == 0 ? null : vote; // Show 'No Votes' if count is 0
+                          },
+                          yValueMapper: (String vote, _) => value.where((v) => v.vote == vote).length,
+                          pointColorMapper: (String vote, _) {
+                            switch (vote) {
+                              case "0":
+                                return Colors.red;
+                              case "1":
+                                return Colors.orange;
+                              case "2":
+                                return Colors.yellow;
+                              case "3":
+                                return Colors.green;
+                              case "5":
+                                return Colors.blue;
+                              case "8":
+                                return Colors.indigo;
+                              case "13":
+                                return Colors.purple;
+                              case "21":
+                                return Colors.pink;
+                              case "34":
+                                return Colors.brown;
+                              case "55":
+                                return Colors.grey;
+                              case "89":
+                                return Colors.cyan;
+                              case "144":
+                                return Colors.teal;
+                              default:
+                                return Colors.white;
+                            }
+                          },
+                        ),
+                      ],
+
+                    );
+                  },
+                )
               ],
             );
           }
@@ -74,7 +137,7 @@ class _HostScreenState extends State<HostScreen> {
       context: context,
       builder: (context) {
         return AlertDialog(
-          title:  Text('Host IP and Port: $ipAndPort'),
+          title:  Text('Host IP and Port: $ipAndPort',style: TextStyle(color: Colors.black),),
           content: SvgPicture.memory(
             qrBytes,
             width: 200,
@@ -102,9 +165,8 @@ class RealTimeVotesList extends StatefulWidget {
   @override
   State<RealTimeVotesList> createState() => _RealTimeVotesListState();
 }
-
 class _RealTimeVotesListState extends State<RealTimeVotesList> {
-  List<String> votes = [];
+
   @override
   void initState() {
     widget.socket.listen((event) {
@@ -112,7 +174,16 @@ class _RealTimeVotesListState extends State<RealTimeVotesList> {
         final datagram = widget.socket.receive();
         if (datagram != null) {
           final message = utf8.decode(datagram.data);
-          votes.add(message);
+          final parts = message.trim().split(' 9971 ');
+          VoteModel vote = VoteModel(vote: parts.first, username: parts.last,address: datagram.address.address);
+          //check if the address is already in the list
+          //if the address and username already exists, modify the existing vote
+          final existingVoteIndex = -1;
+          if (existingVoteIndex != -1) {
+            recievedVotes.value[existingVoteIndex] = vote;
+          } else {
+            recievedVotes.value.add(vote);
+          }
           setState(() {});
           print('🔵 Received from ${datagram.address.address}: $message');
         }
@@ -123,14 +194,30 @@ class _RealTimeVotesListState extends State<RealTimeVotesList> {
   }
   @override
   Widget build(BuildContext context) {
-    return ListView.builder(
-      itemCount: votes.length, // Placeholder for real-time votes
-      itemBuilder: (context, index) {
-        return ListTile(
-          title: const Text('Real-time Votes', style: TextStyle(color: Colors.white)),
-          subtitle:  Text(votes[index].toString(),style: TextStyle(color: Colors.white,fontSize: 16),),
+    return ValueListenableBuilder(
+      valueListenable: recievedVotes,
+      builder: (context, value, child) {
+        return ListView.separated(
+          scrollDirection: Axis.horizontal,
+          itemCount: recievedVotes.value.length, // Placeholder for real-time votes
+          separatorBuilder: (context, index) => const SizedBox(width: 12,),
+          itemBuilder: (context, index) {
+            return ConstrainedBox(
+              constraints: BoxConstraints(
+                maxWidth: 50,
+              ),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(recievedVotes.value[index].username, style: TextStyle(color: Colors.white,),maxLines: 1,),
+                  Text(recievedVotes.value[index].vote.toString(),style: TextStyle(color: Colors.white,fontSize: 16),),
+                ],
+
+              ),
+            );
+          },
         );
-      },
+      }
     );
   }
   @override
