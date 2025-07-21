@@ -1,4 +1,3 @@
-
 import 'dart:convert';
 import 'dart:io';
 import 'dart:typed_data';
@@ -7,11 +6,10 @@ import 'package:flutter/material.dart';
 import 'package:barcode/barcode.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:network_info_plus/network_info_plus.dart';
-import 'package:offline_voting/Vote_model.dart';
-import 'package:offline_voting/votes_data.dart';
+import 'package:offline_voting/data/models/vote_model.dart';
+import 'package:offline_voting/data/repositories/votes_repository.dart';
 import 'package:syncfusion_flutter_charts/charts.dart';
-import 'local_network_service/local_network_service.dart' as LocNetworkService;
-import 'main.dart';
+import 'package:offline_voting/core/services/local_network_service.dart' as LocNetworkService;
 
 class HostScreen extends StatefulWidget {
   const HostScreen({super.key});
@@ -179,10 +177,14 @@ class _RealTimeVotesListState extends State<RealTimeVotesList> {
         if (datagram != null) {
           final message = utf8.decode(datagram.data);
           final parts = message.trim().split(' 9971 ');
-          VoteModel vote = VoteModel(vote: parts.first, username: parts.last,address: datagram.address.address);
+          VoteModel vote = VoteModel(
+              vote: parts.first,
+              username: parts.last,
+              address: datagram.address.address);
           //check if the address is already in the list
           //if the address and username already exists, modify the existing vote
-          final existingVoteIndex = recievedVotes.value.indexWhere((v) => v.address == datagram.address.address && v.username == vote.username);
+          final existingVoteIndex = recievedVotes.value.indexWhere(
+              (v) => (v as VoteModel).username == vote.username);
 
           setState(() {
             if (existingVoteIndex != -1) {
@@ -205,6 +207,7 @@ class _RealTimeVotesListState extends State<RealTimeVotesList> {
       valueListenable: recievedVotes,
       builder: (context, value, child) {
         return ListView.separated(
+          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
           scrollDirection: Axis.horizontal,
           itemCount: recievedVotes.value.length, // Placeholder for real-time votes
           separatorBuilder: (context, index) => const SizedBox(width: 12,),

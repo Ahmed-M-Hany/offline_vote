@@ -2,6 +2,6 @@
 
 import 'package:flutter/cupertino.dart';
 
-import 'Vote_model.dart';
+import '../models/vote_model.dart';
 
 ValueNotifier<List<VoteModel>> recievedVotes = ValueNotifier<List<VoteModel>>([]);

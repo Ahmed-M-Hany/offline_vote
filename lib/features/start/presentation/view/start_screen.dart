@@ -2,10 +2,8 @@
 
 import 'package:flutter/material.dart';
 
-import 'package:offline_voting/local_network_service/local_network_service.dart';
-import 'package:offline_voting/qr_scan_screen.dart';
-
-import 'host_screen.dart';
+import 'package:offline_voting/features/host/presentation/view/host_screen.dart';
+import 'package:offline_voting/features/joiner/presentation/view/qr_scan_screen.dart';
 
 class StartScreen extends StatelessWidget {
   const StartScreen({super.key});

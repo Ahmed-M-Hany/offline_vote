@@ -1,7 +1,7 @@
 
 import 'package:flutter/material.dart';
-import 'package:offline_voting/choosen_number_screen.dart';
-import 'package:offline_voting/local_network_service/local_network_service.dart';
+import 'package:offline_voting/features/joiner/presentation/view/choosen_number_screen.dart';
+import 'package:offline_voting/core/services/local_network_service.dart';
 
 class JoinerScreen extends StatefulWidget {
   const JoinerScreen({super.key, required this.ipAndPort});
@@ -34,7 +34,12 @@ class _JoinerScreenState extends State<JoinerScreen> {
             content: Form(
               key: _formKey,
               child: TextFormField(
-                decoration:  InputDecoration(hintText: 'Username',hintStyle: TextStyle(color: Colors.grey)),
+                //text color black
+                decoration:  InputDecoration(
+                    hintText: 'Username',
+                    hintStyle: TextStyle(color: Colors.black54),
+                ),
+                style: TextStyle(color: Colors.black),
                 validator: (value) {
                   _username = value ?? "";
                   if(value == null || value.isEmpty) {
@@ -54,10 +59,6 @@ class _JoinerScreenState extends State<JoinerScreen> {
                 onPressed: () {
                   if (_formKey.currentState!.validate()) {
                     Navigator.of(context).pop();
-                  } else {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(content: Text('Please enter a valid username ❌')),
-                    );
                   }
                 },
                 child: const Text('OK'),

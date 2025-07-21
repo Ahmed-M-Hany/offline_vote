@@ -1,7 +1,7 @@
 
 import 'package:flutter/material.dart';
 import 'package:mobile_scanner/mobile_scanner.dart';
-import 'package:offline_voting/joiner_screen.dart';
+import 'package:offline_voting/features/joiner/presentation/view/joiner_screen.dart';
 
 class QrScanScreen extends StatefulWidget {
   const QrScanScreen({super.key});
