@@ -129,8 +129,7 @@ class _HostScreenState extends State<HostScreen> {
   }
   _showIpAndPortQrDialog()async{
     var qr =Barcode.qrCode();
-    final info = NetworkInfo();
-    final ip = await info.getWifiIP();
+    final ip = await LocNetworkService.getLocalIpAddress();
     String ipAndPort = '${ip} ${54321}';
     var qrData = qr.toSvg(ipAndPort, width: 200, height: 200);
     Uint8List qrBytes = utf8.encode(qrData);

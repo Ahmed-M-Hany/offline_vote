@@ -12,7 +12,7 @@ import '../../main.dart';
 Future<RawDatagramSocket> startHost() async {
   const int port = 54321;
   final socket = await RawDatagramSocket.bind(InternetAddress.anyIPv4, port);
-  final ip = await _getLocalIpAddress();
+  final ip = await getLocalIpAddress();
 
   print('🟢 Host started. IP: $ip, Port: $port');
 
@@ -20,7 +20,7 @@ Future<RawDatagramSocket> startHost() async {
 
 }
 
-Future<String> _getLocalIpAddress() async {
+Future<String> getLocalIpAddress() async {
   final interfaces = await NetworkInterface.list(
     type: InternetAddressType.IPv4,
     includeLoopback: false,

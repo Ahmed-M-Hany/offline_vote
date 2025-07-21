@@ -17,6 +17,7 @@ class StartScreen extends StatelessWidget {
       body: Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
+          spacing: 8,
           children: [
             ElevatedButton(
               onPressed: () async {
